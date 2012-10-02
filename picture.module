@@ -404,7 +404,7 @@ function theme_picture($variables) {
 
   // All breakpoints and multipliers.
   foreach ($variables['breakpoints'] as $breakpoint_name => $multipliers) {
-    $breakpoint = breakpoints_breakpoint_load($breakpoint_name);
+    $breakpoint = breakpoint_breakpoint_load($breakpoint_name);
     if ($breakpoint) {
       $new_sources = array();
       foreach ($multipliers as $multiplier => $image_style) {

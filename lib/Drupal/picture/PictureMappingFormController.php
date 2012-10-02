@@ -56,7 +56,7 @@ class PictureMappingFormController extends EntityFormController {
       '#type' => 'select',
       '#title' => t('Breakpoint Set'),
       '#default_value' => !empty($picture_mapping->breakpointSet) ? $picture_mapping->breakpointSet->id() : '',
-      '#options' => breakpoints_breakpointset_select_options(),
+      '#options' => breakpoint_breakpointset_select_options(),
       '#required' => TRUE,
     );
 
