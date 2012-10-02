@@ -1,8 +1,9 @@
 <?php
 
+use \Drupal\picture\PictureMapping;
+use \Drupal\Core\Template\Attribute;
+
 define('PICTURE_CLASS', 'resp-img-picture');
-define('PICTURE_SEPARATOR', '__');
-define('PICTURE_STYLE_PREFIX', 'resp__img__');
 
 /**
  * Implements hook_permission().
@@ -22,42 +23,75 @@ function picture_permission() {
 function picture_menu() {
   $items = array();
 
-  $items['admin/config/media/picture'] = array(
-    'title' => 'Picture',
-    'description' => 'Manage Pictures',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('picture_admin_breakpoints'),
+  $items['admin/config/media/picturemapping'] = array(
+    'title' => 'Picture Mappings',
+    'description' => 'Manage picture mappings',
     'access arguments' => array('administer pictures'),
-    'file' => 'picture.admin.inc',
-  );
-
-  $items['admin/config/media/picture/groups'] = array(
-    'title' => 'Groups',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => 10,
+    'page callback' => 'picture_mapping_page',
+    'file' => 'picture_mapping.admin.inc',
   );
-
-  $items['admin/config/media/picture/groups/global'] = array(
-    'title' => 'Map breakpoints and image styles',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -1,
+  $items['admin/config/media/picturemapping/add'] = array(
+    'title' => 'Add picture mapping',
+    'page callback' => 'picture_mapping_page_add',
+    'access callback' => 'user_access',
+    'access arguments' => array('administer pictures'),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'picture_mapping.admin.inc',
   );
-
-  $breakpoint_groups = breakpoints_breakpoint_group_load_all();
-  foreach ($breakpoint_groups as $breakpoint_group_name => $breakpoint_group) {
-    if (!empty($breakpoint_group->machine_name)) {
-      $items['admin/config/media/picture/groups/' . $breakpoint_group->machine_name] = array(
-        'title' => $breakpoint_group->name,
-        'page arguments' => array('picture_admin_breakpoints', $breakpoint_group->machine_name),
-        'type' => MENU_LOCAL_TASK,
-        'access arguments' => array('administer pictures'),
-        'file' => 'picture.admin.inc',
-        'weight' => 15,
-      );
-    }
-  }
+  $items['admin/config/media/picturemapping/%picture_mapping/edit'] = array(
+    'title' => 'Edit picture mapping',
+    'page callback' => 'picture_mapping_page_edit',
+    'page arguments' => array(4),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer pictures'),
+    'file' => 'picture_mapping.admin.inc',
+  );
+  $items['admin/config/media/picturemapping/%picture_mapping/duplicate'] = array(
+    'title' => 'Duplicate picture mapping',
+    'page callback' => 'picture_mapping_page_duplicate',
+    'page arguments' => array(4),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer pictures'),
+    'file' => 'picture_mapping.admin.inc',
+  );
+  $items['admin/config/media/picturemapping/%picture_mapping/delete'] = array(
+    'title' => 'Delete',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('picture_mapping_action_confirm', 4, 5),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer pictures'),
+    'file' => 'picture_mapping.admin.inc',
+  );
 
   return $items;
+}
+
+/**
+ * Implements hook_entity_info().
+ */
+function picture_entity_info() {
+  $types['picture_mapping'] = array(
+    'label' => 'Picture mapping',
+    'entity class' => 'Drupal\picture\PictureMapping',
+    'controller class' => 'Drupal\Core\Config\Entity\ConfigStorageController',
+    'config prefix' => 'picture.mappings',
+    'entity keys' => array(
+      'id' => 'id',
+      'label' => 'label',
+      'uuid' => 'uuid',
+    ),
+    'form controller class' => array(
+      'default' => 'Drupal\picture\PictureMappingFormController',
+      'add' => 'Drupal\picture\PictureMappingFormController',
+      'duplicate' => 'Drupal\picture\PictureMappingFormController',
+    ),
+    'list controller class' => 'Drupal\picture\PictureMappingListController',
+    'list path' => 'admin/config/media/picturemapping',
+    'uri callback' => 'picture_mapping_uri',
+  );
+
+  return $types;
 }
 
 /**
@@ -80,88 +114,40 @@ function picture_library_info() {
       drupal_get_path('module', 'picture') . '/picturefill/picturefill.js' => array('type' => 'file', 'weight' => -10, 'group' => JS_DEFAULT),
     ),
   );
+  return $libraries;
 }
 
 /**
- * Empty picture object.
+ * Load one picture by its identifier.
  */
-function picture_empty_object() {
-  return (object)picture_empty_array();
+function picture_mapping_load($id) {
+  return entity_load('picture_mapping', $id);
 }
 
 /**
- * Empty picture array.
- */
-function picture_empty_array() {
-  return array(
-    'machine_name' => '',
-    'breakpoint_group' => '',
-    'mapping' => array(),
-  );
-}
-
-/**
- * Load mapping.
- */
-function picture_mapping_load($name) {
-  return picture_mapping_load_by_fullkey('picture.mappings.' . $name);
-}
-
-/**
- * Load a single mapping using the full config key.
- */
-function picture_mapping_load_by_fullkey($name) {
-  $config = config($name);
-  if ($config->isNew()) {
-    return FALSE;
-  }
-  $data = $config->get();
-  $data += picture_empty_array();
-  return (object)$data;
-}
-
-/**
- * Load all picture mappings.
+ * Load all pictures.
  */
 function picture_mapping_load_all() {
-  $picture_mappings = array();
-  $name = 'picture.mappings.';
-  $picture_mappings_names = config_get_storage_names_with_prefix($name);
-  foreach ($picture_mappings_names as $picture_mappings_name) {
-    $picture_mappings[$picture_mappings_name] = picture_mapping_load_by_fullkey($picture_mappings_name);
-  }
+  $picture_mappings = entity_load_multiple('picture_mapping');
   return $picture_mappings;
 }
 
 /**
- * Save a mapping.
+ * Picture uri callback.
  */
-function picture_mapping_save(&$mapping) {
-  $name = $mapping->machine_name;
-  $config = config($name);
-  $config->set('machine_name', $mapping->machine_name);
-  $config->set('breakpoint_group', $mapping->breakpoint_group);
-  $config->set('mapping', $mapping->mapping);
-  $config->save();
-
-  $data = $config->get();
-  $data += picture_empty_array();
-  return (object)$data;
+function picture_mapping_uri(PictureMapping $picture_mapping) {
+  return array(
+    'path' => 'admin/config/media/picturemapping/' . $picture_mapping->id(),
+  );
 }
 
 /**
- * Validate mappings.
+ * Picture uri callback.
  */
-function picture_mapping_validate($mapping) {
-  if (!is_object($mapping)) {
-    return FALSE;
-  }
-  foreach (array('machine_name', 'breakpoint_group', 'mapping') as $property) {
-    if (!property_exists($mapping, $property)) {
-      return FALSE;
-    }
-  }
-  return TRUE;
+function picture_mapping_set_uri(PictureMapping $picture_mapping) {
+  return array(
+    'path' => 'admin/config/media/picturemapping/' . $picture_mapping->id(),
+  );
 }
 
 /**
@@ -189,6 +175,14 @@ function picture_theme() {
         'breakpoints' => array(),
       ),
     ),
+    'picture_source' => array(
+      'variables' => array(
+        'src' => NULL,
+        'srcset' => NULL,
+        'dimension' => NULL,
+        'media' => NULL,
+      ),
+    ),
   );
 }
 
@@ -200,7 +194,7 @@ function picture_field_formatter_info() {
     'picture' => array(
       'label' => t('Picture'),
       'field types' => array('image'),
-      'settings' => array('picture_group' => '', 'fallback_image_style' => '', 'image_link' => ''),
+      'settings' => array('picture_mapping' => '', 'fallback_image_style' => '', 'image_link' => ''),
     ),
   );
 
@@ -214,23 +208,20 @@ function picture_field_formatter_settings_form($field, $instance, $view_mode, $f
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
 
-  $picture_group_options = array();
+  $picture_options = array();
   $picture_mappings = picture_mapping_load_all();
   if ($picture_mappings && !empty($picture_mappings)) {
     foreach ($picture_mappings as $machine_name => $picture_mapping) {
-      $breakpoint_group = breakpoints_breakpoint_group_load($picture_mapping->breakpoint_group);
-      if ($breakpoint_group) {
-        $picture_group_options[$machine_name] = $breakpoint_group->name;
-      }
+      $picture_options[$machine_name] = $picture_mapping->label();
     }
   }
 
-  $element['picture_group'] = array(
-    '#title' => t('Picture group'),
+  $element['picture_mapping'] = array(
+    '#title' => t('Picture mapping'),
     '#type' => 'select',
-    '#default_value' => $settings['picture_group'],
+    '#default_value' => $settings['picture_mapping'],
     '#required' => TRUE,
-    '#options' => $picture_group_options,
+    '#options' => $picture_options,
   );
 
   $image_styles = image_style_options(FALSE);
@@ -266,13 +257,12 @@ function picture_field_formatter_settings_summary($field, $instance, $view_mode)
 
   $summary = array();
 
-  $picture_mapping = picture_mapping_load_by_fullkey($settings['picture_group']);
-  $breakpoint_group = breakpoints_breakpoint_group_load($picture_mapping->breakpoint_group);
-  if ($breakpoint_group) {
-    $summary[] = t('Picture group: @picture_group', array('@picture_group' => $breakpoint_group->name));
+  $picture_mapping = picture_mapping_load($settings['picture_mapping']);
+  if ($picture_mapping) {
+    $summary[] = t('Picture mapping: @picture_mapping', array('@picture_mapping' => $picture_mapping->label()));
   }
   else {
-    $summary[] = t("Picture group doesn't exists");
+    $summary[] = t("Picture mapping doesn't exists");
   }
 
   $image_styles = image_style_options(FALSE);
@@ -312,10 +302,9 @@ function picture_field_formatter_view($entity_type, $entity, $field, $instance, 
 
   $breakpoint_styles = array();
   $fallback_image_style = '';
-  $group_name = $display['settings']['picture_group'];
-  $mappings = picture_mapping_load_by_fullkey($group_name);
-  if ($mappings) {
-    foreach ($mappings->mapping as $breakpoint_name => $multipliers) {
+  $picture_mapping = picture_mapping_load($display['settings']['picture_mapping']);
+  if ($picture_mapping) {
+    foreach ($picture_mapping->mappings as $breakpoint_name => $multipliers) {
       if (!empty($multipliers)) {
         foreach ($multipliers as $multiplier => $image_style) {
           if (!empty($image_style)) {
@@ -404,81 +393,98 @@ function theme_picture($variables) {
     unset($variables['height']);
   }
 
-  $images = array();
+  $sources = array();
   $output = array();
 
-  // Fallback image.
-  $img = theme('image_style', $variables);
-  $img = str_replace('<img', '', $img);
-  $img = str_replace('/>', '', $img);
-  $images[] = array(
-    'image' => $img,
+  // Fallback image, output as source with media query.
+  $sources[] = array(
+    'src' => image_style_url($variables['style_name'], $variables['uri']),
+    'dimensions' => picture_get_image_dimensions($variables),
   );
 
   // All breakpoints and multipliers.
   foreach ($variables['breakpoints'] as $breakpoint_name => $multipliers) {
-    $breakpoint = breakpoints_breakpoint_load_by_fullkey($breakpoint_name);
+    $breakpoint = breakpoints_breakpoint_load($breakpoint_name);
     if ($breakpoint) {
-      $new_images = array();
+      $new_sources = array();
       foreach ($multipliers as $multiplier => $image_style) {
-        $new_image = $variables;
-        // Add classes to ease styling
-        $new_image['style_name'] = $image_style;
-        $new_image['#multiplier'] = $multiplier;
-        $new_images[] = $new_image;
+        $new_source = $variables;
+        $new_source['style_name'] = $image_style;
+        $new_source['#multiplier'] = $multiplier;
+        $new_sources[] = $new_source;
       }
-      $img = theme('image_style', $new_images[0]);
-      $img = str_replace('<img', '', $img);
-      $img = str_replace('/>', '', $img);
 
-      // Only one image, output as src.
-      if (count($new_images) == 1) {
-        $images[] = array(
-          'image' => $img,
-          'media' => $breakpoint->breakpoint,
+      // Only one image, use src.
+      if (count($new_sources) == 1) {
+        $sources[] = array(
+          'src' => image_style_url($new_sources[0]['style_name'], $new_sources[0]['uri']),
+          'dimensions' => picture_get_image_dimensions($new_sources[0]),
+          'media' => $breakpoint->mediaQuery,
         );
       }
       else {
-        // Mutliple images, output as srcset.
+        // Mutliple images, use srcset.
         $srcset = array();
-        foreach ($new_images as $new_image) {
-          $srcset[] = image_style_url($new_image['style_name'], $new_image['uri']) . ' ' . $new_image['#multiplier'];
+        foreach ($new_sources as $new_source) {
+          $srcset[] = image_style_url($new_source['style_name'], $new_source['uri']) . ' ' . $new_source['#multiplier'];
         }
-        $img = preg_replace('/src="[^"]*"/', '', $img);
-        $images[] = array(
+        $sources[] = array(
           'srcset' => implode(', ', $srcset),
-          'media' => $breakpoint->breakpoint,
-          'image' => $img,
+          'dimensions' => picture_get_image_dimensions($new_sources[0]),
+          'media' => $breakpoint->mediaQuery,
         );
       }
     }
   }
 
-  if (!empty($images)) {
-    $output[] = '<picture class="' . PICTURE_CLASS . '" alt="' . check_plain($variables['alt']) . '" title="' . check_plain($variables['title']) . '">';
-
-    // add variants to the output
-    foreach ($images as $image) {
-      if (isset($image['media']) && !empty($image['media'])) {
-        if (!isset($image['srcset'])) {
-          $output[] = '<!-- <source media="' . $image['media'] . '" ' . $image['image'] . ' /> -->';
-          $output[] = '<source media="' . $image['media'] . '" ' . $image['image'] . ' />';
-        }
-        else {
-          $output[] = '<!-- <source media="' . $image['media'] . '" srcset="' . $image['srcset'] . '" ' . $image['image'] . ' /> -->';
-          $output[] = '<source media="' . $image['media'] . '" srcset="' . $image['srcset'] . '" ' . $image['image'] . ' />';
-        }
-      }
-      else {
-        $output[] = '<!-- <source ' . $image['image'] . ' /> -->';
-        $output[] = '<source ' . $image['image'] . ' />';
+  if (!empty($sources)) {
+    $attributes = array();
+    foreach (array('alt', 'title') as $key) {
+      if (isset($variables[$key])) {
+        $attributes[$key] = $variables[$key];
       }
     }
+    $output[] = '<picture' . new Attribute($attributes) . '>';
 
-    // output the default image as fallback
-    // $output .= '<img src="' . image_style_url($variables['style_name'], $variables['uri']) . '" alt="' . check_plain($variables['alt']) . '" />';
-    $output[] = '<noscript><img ' . $images[0]['image'] . '/></noscript>';
+    // add source tags to the output.
+    foreach ($sources as $source) {
+      $output[] = theme('picture_source', $source);
+    }
+
+    // output the fallback image.
+    $output[] = '<noscript>' . theme('image_style', $variables) . '</noscript>';
     $output[] = '</picture>';
     return implode("\n", $output);
   }
+}
+
+function theme_picture_source($variables) {
+  $output = array();
+  if (isset($variables['media']) && !empty($variables['media'])) {
+    if (!isset($variables['srcset'])) {
+      $output[] = '<!-- <source media="' . $variables['media'] . '" src="' . $variables['src'] . '" ' . new Attribute($variables['dimensions']) . ' /> -->';
+      $output[] = '<source media="' . $variables['media'] . '" src="' . $variables['src'] . '" ' . new Attribute($variables['dimensions']) . '/>';
+    }
+    elseif (!isset($variables['src'])) {
+      $output[] = '<!-- <source media="' . $variables['media'] . '" srcset="' . $variables['srcset'] . '" ' . new Attribute($variables['dimensions']) . ' /> -->';
+      $output[] = '<source media="' . $variables['media'] . '" srcset="' . $variables['srcset'] . '" ' . new Attribute($variables['dimensions']) . ' />';
+    }
+  }
+  else {
+    $output[] = '<!-- <source src="' . $variables['src'] . '" ' . new Attribute($variables['dimensions']) . ' /> -->';
+    $output[] = '<source src="' . $variables['src'] . '" ' . new Attribute($variables['dimensions']) . '/>';
+  }
+  return implode("\n", $output);
+}
+
+function picture_get_image_dimensions($variables) {
+  // Determine the dimensions of the styled image.
+  $dimensions = array(
+    'width' => $variables['width'],
+    'height' => $variables['height'],
+  );
+
+  image_style_transform_dimensions($variables['style_name'], $dimensions);
+
+  return $dimensions;
 }
