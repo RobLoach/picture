@@ -1,11 +1,11 @@
 <?php
 
-use \Drupal\picture\PictureMapping;
-
 /**
  * @file
  * Administration functions to maintain picture.
  */
+
+use \Drupal\picture\PictureMapping;
 
 /**
  * Page callback: Presents the picture list page.

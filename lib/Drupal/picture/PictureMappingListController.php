@@ -16,12 +16,8 @@ use Drupal\picture\PictureMapping;
  */
 class PictureMappingListController extends ConfigEntityListController {
 
-  public function __construct($entity_type, $entity_info = FALSE) {
-    parent::__construct($entity_type, $entity_info);
-  }
-
   /**
-   * Overrides Drupal\config\EntityListControllerBase::hookMenu();
+   * Overrides Drupal\config\EntityListControllerBase::hookMenu().
    */
   public function hookMenu() {
     $path = $this->entityInfo['list path'];

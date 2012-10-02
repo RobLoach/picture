@@ -50,7 +50,7 @@ class PictureMappingFormController extends EntityFormController {
         'exists' => 'picture_mapping_load',
         'source' => array('label'),
       ),
-      '#disabled' => (bool)$picture_mapping->id() && $this->operation != 'duplicate',
+      '#disabled' => (bool) $picture_mapping->id() && $this->operation != 'duplicate',
     );
     $form['breakpointSet'] = array(
       '#type' => 'select',
@@ -117,4 +117,3 @@ class PictureMappingFormController extends EntityFormController {
   }
 
 }
-
