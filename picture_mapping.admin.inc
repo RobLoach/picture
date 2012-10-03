@@ -2,13 +2,16 @@
 
 /**
  * @file
- * Administration functions to maintain picture.
+ * Administration functions to maintain picture mappings.
  */
 
 use \Drupal\picture\PictureMapping;
 
 /**
  * Page callback: Presents the picture list page.
+ *
+ * @return
+ *   A render array for a page containing a list of content.
  *
  * @see picture_menu()
  */
@@ -18,7 +21,12 @@ function picture_mapping_page() {
 }
 
 /**
- * Page callback: Presents the picture editing form.
+ * Page callback: Presents the picture mapping editing form.
+ *
+ * @param Drupal\picture\PictureMapping $picture_mapping
+ *
+ * @return
+ *   A render array for a page containing a list of content.
  *
  * @see picture_menu()
  */
@@ -28,7 +36,10 @@ function picture_mapping_page_edit($picture_mapping) {
 }
 
 /**
- * Page callback: Provides the new picture addition form.
+ * Page callback: Provides the new picture mapping addition form.
+ *
+ * @return
+ *   A render array for a page containing a list of content.
  *
  * @see picture_menu()
  */
@@ -40,6 +51,9 @@ function picture_mapping_page_add() {
 
 /**
  * Page callback: Form constructor for picture action confirmation form.
+ *
+ * @param Drupal\picture\PictureMapping $picture_mapping
+ * @param string $action
  *
  * @see picture_menu()
  */

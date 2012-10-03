@@ -119,17 +119,20 @@ function picture_library_info() {
 
 /**
  * Load one picture by its identifier.
+ *
+ * @param int $id
+ *   The id of the picture mapping to load.
+ *
+ * @return Drupal\picture\Picture
+ *   The entity object, or FALSE if there is no entity with the given id.
+ *
+ * @todo Needed for menu_callback
+ *
+ * @see http://drupal.org/node/1798214
+ *
  */
 function picture_mapping_load($id) {
   return entity_load('picture_mapping', $id);
-}
-
-/**
- * Load all pictures.
- */
-function picture_mapping_load_all() {
-  $picture_mappings = entity_load_multiple('picture_mapping');
-  return $picture_mappings;
 }
 
 /**
@@ -209,7 +212,7 @@ function picture_field_formatter_settings_form($field, $instance, $view_mode, $f
   $settings = $display['settings'];
 
   $picture_options = array();
-  $picture_mappings = picture_mapping_load_all();
+  $picture_mappings = entity_load_multiple('picture_mapping');
   if ($picture_mappings && !empty($picture_mappings)) {
     foreach ($picture_mappings as $machine_name => $picture_mapping) {
       $picture_options[$machine_name] = $picture_mapping->label();
@@ -257,7 +260,7 @@ function picture_field_formatter_settings_summary($field, $instance, $view_mode)
 
   $summary = array();
 
-  $picture_mapping = picture_mapping_load($settings['picture_mapping']);
+  $picture_mapping = entity_load('picture_mapping', $settings['picture_mapping']);
   if ($picture_mapping) {
     $summary[] = t('Picture mapping: @picture_mapping', array('@picture_mapping' => $picture_mapping->label()));
   }
@@ -301,7 +304,7 @@ function picture_field_formatter_view($entity_type, $entity, $field, $instance, 
 
   $breakpoint_styles = array();
   $fallback_image_style = '';
-  $picture_mapping = picture_mapping_load($display['settings']['picture_mapping']);
+  $picture_mapping = entity_load('picture_mapping', $display['settings']['picture_mapping']);
   if ($picture_mapping) {
     foreach ($picture_mapping->mappings as $breakpoint_name => $multipliers) {
       if (!empty($multipliers)) {

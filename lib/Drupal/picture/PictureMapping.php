@@ -87,7 +87,7 @@ class PictureMapping extends ConfigEntityBase {
    */
   protected function loadBreakpointGroup() {
     if ($this->breakpointGroup) {
-      $breakpoint_group = breakpoint_group_load($this->breakpointGroup);
+      $breakpoint_group = entity_load('breakpoint_group', $this->breakpointGroup);
       $this->breakpointGroup = $breakpoint_group;
     }
   }
