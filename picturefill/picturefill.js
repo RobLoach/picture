@@ -27,12 +27,6 @@
         tar.width = src.getAttribute( "width" );
         tar.height = src.getAttribute( "height" );
       }
-      if (src.getAttribute( "title" )) {
-        tar.title = src.getAttribute( "title" );
-      }
-      if (src.getAttribute( "class" )) {
-        tar.setAttribute ("class", src.getAttribute( "class" ));
-      }
     }
 
     var ps = w.document.getElementsByTagName( "picture" );
@@ -113,33 +107,6 @@
         }
       }
     }
-    /*
-// Manual resolution switching, to simulate UA interference.
-    if( hasHD ){
-      var body = w.document.getElementsByTagName("body")[0],
-        prevSwitch = w.document.getElementById( "#toggle-res" ),
-        picSwitch = w.document.createElement( "a" );
-
-      if( prevSwitch ){
-        body.removeChild( prevSwitch );
-      }
-
-      picSwitch.id = "toggle-res";
-      picSwitch.href = "#";
-      picSwitch.innerHTML = ( prefHD ? "S" : "H" ) + "D only";
-      picSwitch.title = "Switch images to " + ( prefHD ? "Standard" : "High" ) + "Definition";
-      picSwitch.className = "pf-pref pf-pref-" + ( prefHD ? "standard" : "high" );
-
-      body.insertBefore( picSwitch, body.children[0] );
-
-      picSwitch.onclick = function(){
-        prefHD = !prefHD;
-        if( w.localStorage ){
-          w.localStorage[ "picturefill-prefHD" ] = prefHD;
-        }
-        return false;
-      };
-    }*/
   };
 
   // Run on resize and domready (w.load as a fallback)

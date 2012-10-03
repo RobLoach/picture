@@ -52,18 +52,18 @@ class PictureMappingFormController extends EntityFormController {
       ),
       '#disabled' => (bool) $picture_mapping->id() && $this->operation != 'duplicate',
     );
-    $form['breakpointSet'] = array(
+    $form['breakpointGroup'] = array(
       '#type' => 'select',
-      '#title' => t('Breakpoint Set'),
-      '#default_value' => !empty($picture_mapping->breakpointSet) ? $picture_mapping->breakpointSet->id() : '',
-      '#options' => breakpoint_breakpointset_select_options(),
+      '#title' => t('Breakpoint Group'),
+      '#default_value' => !empty($picture_mapping->breakpointGroup) ? $picture_mapping->breakpointGroup->id() : '',
+      '#options' => breakpoint_group_select_options(),
       '#required' => TRUE,
     );
 
     $image_styles = image_style_options(TRUE);
     foreach ($picture_mapping->mappings as $breakpoint_id => $mapping) {
       foreach ($mapping as $multiplier => $image_style) {
-        $label = $multiplier . ' ' . $picture_mapping->breakpointSet->breakpoints[$breakpoint_id]->name . ' [' . $picture_mapping->breakpointSet->breakpoints[$breakpoint_id]->mediaQuery . ']';
+        $label = $multiplier . ' ' . $picture_mapping->breakpointGroup->breakpoints[$breakpoint_id]->name . ' [' . $picture_mapping->breakpointGroup->breakpoints[$breakpoint_id]->mediaQuery . ']';
         $form['mappings'][$breakpoint_id][$multiplier] = array(
           '#type' => 'select',
           '#title' => check_plain($label),

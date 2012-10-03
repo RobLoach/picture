@@ -8,7 +8,7 @@
 namespace Drupal\picture\Tests;
 
 use Drupal\picture\PictureMapping;
-use Drupal\breakpoint\BreakpointSet;
+use Drupal\breakpoint\BreakpointGroup;
 use Drupal\breakpoint\Breakpoint;
 use Drupal\image\Tests\ImageFieldTestBase;
 
@@ -45,11 +45,11 @@ class PictureFieldDisplayTest extends ImageFieldTestBase {
     $this->admin_user = $this->drupalCreateUser(array('administer pictures', 'access content', 'access administration pages', 'administer site configuration', 'administer content types', 'administer nodes', 'create article content', 'edit any article content', 'delete any article content', 'administer image styles'));
     $this->drupalLogin($this->admin_user);
 
-    // Add breakpointset and breakpoints.
-    $breakpointset = new BreakpointSet();
-    $breakpointset->id = 'atestset';
-    $breakpointset->label = 'A test set';
-    $breakpointset->sourceType = Breakpoint::SOURCE_TYPE_CUSTOM;
+    // Add breakpoint_group and breakpoints.
+    $breakpoint_group = new BreakpointGroup();
+    $breakpoint_group->id = 'atestset';
+    $breakpoint_group->label = 'A test set';
+    $breakpoint_group->sourceType = Breakpoint::SOURCE_TYPE_CUSTOM;
 
     $breakpoints = array();
     $breakpoint_names = array('small', 'medium', 'large');
@@ -65,15 +65,15 @@ class PictureFieldDisplayTest extends ImageFieldTestBase {
         '2x' => '2x',
       );
       $breakpoint->save();
-      $breakpointset->breakpoints[$breakpoint->id()] = $breakpoint;
+      $breakpoint_group->breakpoints[$breakpoint->id()] = $breakpoint;
     }
-    $breakpointset->save();
+    $breakpoint_group->save();
 
     // Add picture mapping.
     $picture_mapping = new PictureMapping();
     $picture_mapping->id = 'mapping_one';
     $picture_mapping->label = 'Mapping One';
-    $picture_mapping->breakpointSet = 'atestset';
+    $picture_mapping->breakpointGroup = 'atestset';
     $picture_mapping->save();
     $picture_mapping->mappings['custom.user.small']['1x'] = 'thumbnail';
     $picture_mapping->mappings['custom.user.medium']['1x'] = 'medium';
@@ -84,14 +84,14 @@ class PictureFieldDisplayTest extends ImageFieldTestBase {
   /**
    * Test picture formatters on node display for public files.
    */
-  function testPictureFieldFormattersPublic() {
+  public function testPictureFieldFormattersPublic() {
     $this->_testPictureFieldFormatters('public');
   }
 
   /**
    * Test picture formatters on node display for private files.
    */
-  private function xxtestPictureFieldFormattersPrivate() {
+  public function testPictureFieldFormattersPrivate() {
     // Remove access content permission from anonymous users.
     user_role_change_permissions(DRUPAL_ANONYMOUS_RID, array('access content' => FALSE));
     $this->_testPictureFieldFormatters('private');
@@ -100,13 +100,18 @@ class PictureFieldDisplayTest extends ImageFieldTestBase {
   /**
    * Test picture formatters on node display.
    */
-  function _testPictureFieldFormatters($scheme) {
+  public function _testPictureFieldFormatters($scheme) {
     $field_name = strtolower($this->randomName());
     $this->createImageField($field_name, 'article', array('uri_scheme' => $scheme));
     // Create a new node with an image attached.
     $test_image = current($this->drupalGetTestFiles('image'));
     $nid = $this->uploadNodeImage($test_image, $field_name, 'article');
     $node = node_load($nid, TRUE);
+
+    // Use the picture formatter.
+    $instance = field_info_instance('node', $field_name, 'article');
+    $instance['display']['default']['type'] = 'picture';
+    $instance['display']['default']['module'] = 'picture';
 
     // Test that the default formatter is being used.
     $image_uri = file_load($node->{$field_name}[LANGUAGE_NOT_SPECIFIED][0]['fid'])->uri;
@@ -118,9 +123,10 @@ class PictureFieldDisplayTest extends ImageFieldTestBase {
     $default_output = theme('image', $image_info);
     $this->assertRaw($default_output, 'Default formatter displaying correctly on full node view.');
 
-    // Test the image linked to file formatter.
+    // Use the picture formatter linked to file formatter.
     $instance = field_info_instance('node', $field_name, 'article');
     $instance['display']['default']['type'] = 'picture';
+    $instance['display']['default']['module'] = 'picture';
     $instance['display']['default']['settings']['image_link'] = 'file';
     field_update_instance($instance);
     $default_output = l(theme('image', $image_info), file_create_url($image_uri), array('html' => TRUE));
@@ -144,32 +150,36 @@ class PictureFieldDisplayTest extends ImageFieldTestBase {
       $this->drupalLogin($this->admin_user);
     }
 
-    // Test the image linked to content formatter.
-    $instance['display']['default']['settings']['image_link'] = 'content';
+    // Use the picture formatter with a picture mapping.
+    $instance['display']['default']['settings']['picture_mapping'] = 'mapping_one';
     field_update_instance($instance);
-    $default_output = l(theme('image', $image_info), 'node/' . $nid, array('html' => TRUE, 'attributes' => array('class' => 'active')));
+    // Output should contain all image styles and all breakpoints.
     $this->drupalGet('node/' . $nid);
-    $this->assertRaw($default_output, 'Image linked to content formatter displaying correctly on full node view.');
+    $this->assertRaw('/styles/thumbnail/');
+    $this->assertRaw('/styles/medium/');
+    $this->assertRaw('/styles/large/');
+    $this->assertRaw('media="(min-width: 200px)"');
+    $this->assertRaw('media="(min-width: 400px)"');
+    $this->assertRaw('media="(min-width: 600px)"');
 
-    // Test the image style 'thumbnail' formatter.
+    // Test the fallback image style.
     $instance['display']['default']['settings']['image_link'] = '';
-    $instance['display']['default']['settings']['fallback_image_style'] = 'thumbnail';
+    $instance['display']['default']['settings']['fallback_image_style'] = 'large';
     field_update_instance($instance);
-    // Ensure the derivative image is generated so we do not have to deal with
-    // image style callback paths.
-    $this->drupalGet(image_style_url('thumbnail', $image_uri));
+
+    $this->drupalGet(image_style_url('large', $image_uri));
     $image_info['uri'] = $image_uri;
-    $image_info['width'] = 100;
-    $image_info['height'] = 50;
-    $image_info['style_name'] = 'thumbnail';
-    $default_output = theme('image_style', $image_info);
+    $image_info['width'] = 480;
+    $image_info['height'] = 240;
+    $image_info['style_name'] = 'large';
+    $default_output = '<noscript>' . theme('image_style', $image_info) . '</noscript>';
     $this->drupalGet('node/' . $nid);
     $this->assertRaw($default_output, 'Image style thumbnail formatter displaying correctly on full node view.');
 
     if ($scheme == 'private') {
       // Log out and try to access the file.
       $this->drupalLogout();
-      $this->drupalGet(image_style_url('thumbnail', $image_uri));
+      $this->drupalGet(image_style_url('large', $image_uri));
       $this->assertResponse('403', 'Access denied to image style thumbnail as anonymous user.');
     }
   }

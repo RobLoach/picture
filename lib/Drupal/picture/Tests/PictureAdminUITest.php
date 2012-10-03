@@ -9,7 +9,7 @@ namespace Drupal\picture\Tests;
 
 use Drupal\simpletest\WebTestBase;
 use Drupal\picture\PictureMapping;
-use Drupal\breakpoint\BreakpointSet;
+use Drupal\breakpoint\BreakpointGroup;
 use Drupal\breakpoint\Breakpoint;
 
 /**
@@ -48,11 +48,11 @@ class PictureAdminUITest extends WebTestBase {
 
     $this->drupalLogin($this->admin_user);
 
-    // Add breakpointset and breakpoints.
-    $breakpointset = new BreakpointSet();
-    $breakpointset->id = 'atestset';
-    $breakpointset->label = 'A test set';
-    $breakpointset->sourceType = Breakpoint::SOURCE_TYPE_CUSTOM;
+    // Add breakpoint_group and breakpoints.
+    $breakpoint_group = new BreakpointGroup();
+    $breakpoint_group->id = 'atestset';
+    $breakpoint_group->label = 'A test set';
+    $breakpoint_group->sourceType = Breakpoint::SOURCE_TYPE_CUSTOM;
 
     $breakpoints = array();
     $breakpoint_names = array('small', 'medium', 'large');
@@ -68,9 +68,9 @@ class PictureAdminUITest extends WebTestBase {
         '2x' => '2x',
       );
       $breakpoint->save();
-      $breakpointset->breakpoints[$breakpoint->id()] = $breakpoint;
+      $breakpoint_group->breakpoints[$breakpoint->id()] = $breakpoint;
     }
-    $breakpointset->save();
+    $breakpoint_group->save();
 
   }
 
@@ -84,13 +84,13 @@ class PictureAdminUITest extends WebTestBase {
 
     // Add a new picture mapping, our breakpoint set should be selected.
     $this->drupalGet('admin/config/media/picturemapping/add');
-    $this->assertFieldByName('breakpointSet', 'atestset');
+    $this->assertFieldByName('breakpointGroup', 'atestset');
 
     // Create a new group.
     $edit = array(
       'label' => 'Mapping One',
       'id' => 'mapping_one',
-      'breakpointSet' => 'atestset',
+      'breakpointGroup' => 'atestset',
     );
     $this->drupalPost('admin/config/media/picturemapping/add', $edit, t('Save'));
 
@@ -104,7 +104,7 @@ class PictureAdminUITest extends WebTestBase {
     // Edit the group.
     $this->drupalGet('admin/config/media/picturemapping/mapping_one/edit');
     $this->assertFieldByName('label', 'Mapping One');
-    $this->assertFieldByName('breakpointSet', 'atestset');
+    $this->assertFieldByName('breakpointGroup', 'atestset');
 
     // Check if the dropdows are present for the mappings.
     $this->assertFieldByName('mappings[custom.user.small][1x]', '');
@@ -117,7 +117,7 @@ class PictureAdminUITest extends WebTestBase {
     // Save mappings for 1x variant only.
     $edit = array(
       'label' => 'Mapping One',
-      'breakpointSet' => 'atestset',
+      'breakpointGroup' => 'atestset',
       'mappings[custom.user.small][1x]' => 'thumbnail',
       'mappings[custom.user.medium][1x]' => 'medium',
       'mappings[custom.user.large][1x]' => 'large',

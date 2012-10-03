@@ -43,18 +43,18 @@ class PictureMapping extends ConfigEntityBase {
   public $mappings = array();
 
   /**
-   * The Picture BreakpointSet.
+   * The Picture BreakpointGroup.
    *
-   * @var BreakpointSet
+   * @var BreakpointGroup
    */
-  public $breakpointSet = '';
+  public $breakpointGroup = '';
 
   /**
    * Overrides Drupal\config\ConfigEntityBase::__construct().
    */
   public function __construct(array $values = array(), $entity_type = 'picture_mapping') {
     parent::__construct($values, $entity_type);
-    $this->loadBreakpointSet();
+    $this->loadBreakpointGroup();
     $this->loadAllMappings();
   }
 
@@ -63,11 +63,11 @@ class PictureMapping extends ConfigEntityBase {
    */
   public function save() {
     // Only save the keys, but return the full objects.
-    if (isset($this->breakpointSet) && is_object($this->breakpointSet)) {
-      $this->breakpointSet = $this->breakpointSet->id();
+    if (isset($this->breakpointGroup) && is_object($this->breakpointGroup)) {
+      $this->breakpointGroup = $this->breakpointGroup->id();
     }
     parent::save();
-    $this->loadBreakpointSet();
+    $this->loadBreakpointGroup();
     $this->loadAllMappings();
   }
 
@@ -83,12 +83,12 @@ class PictureMapping extends ConfigEntityBase {
   }
 
   /**
-   * Load breakpointSet.
+   * Load breakpointGroup.
    */
-  protected function loadBreakpointSet() {
-    if ($this->breakpointSet) {
-      $breakpointset = breakpoint_breakpointset_load($this->breakpointSet);
-      $this->breakpointSet = $breakpointset;
+  protected function loadBreakpointGroup() {
+    if ($this->breakpointGroup) {
+      $breakpoint_group = breakpoint_group_load($this->breakpointGroup);
+      $this->breakpointGroup = $breakpoint_group;
     }
   }
 
@@ -98,8 +98,8 @@ class PictureMapping extends ConfigEntityBase {
   protected function loadAllMappings() {
     $loaded_mappings = $this->mappings;
     $this->mappings = array();
-    if ($this->breakpointSet) {
-      foreach ($this->breakpointSet->breakpoints as $breakpoint_id => $breakpoint) {
+    if ($this->breakpointGroup) {
+      foreach ($this->breakpointGroup->breakpoints as $breakpoint_id => $breakpoint) {
         // Get the mapping for the default multiplier.
         $this->mappings[$breakpoint_id]['1x'] = '';
         if (isset($loaded_mappings[$breakpoint_id]['1x'])) {

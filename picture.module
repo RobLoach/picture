@@ -291,7 +291,6 @@ function picture_field_formatter_settings_summary($field, $instance, $view_mode)
  */
 function picture_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
-
   // Check if the formatter involves a link.
   if ($display['settings']['image_link'] == 'content') {
     $uri = $entity->uri();
@@ -404,7 +403,7 @@ function theme_picture($variables) {
 
   // All breakpoints and multipliers.
   foreach ($variables['breakpoints'] as $breakpoint_name => $multipliers) {
-    $breakpoint = breakpoint_breakpoint_load($breakpoint_name);
+    $breakpoint = breakpoint_load($breakpoint_name);
     if ($breakpoint) {
       $new_sources = array();
       foreach ($multipliers as $multiplier => $image_style) {
