@@ -101,7 +101,7 @@ class PictureFieldDisplayTest extends ImageFieldTestBase {
    * Test picture formatters on node display.
    */
   public function _testPictureFieldFormatters($scheme) {
-    $field_name = strtolower($this->randomName());
+    $field_name = drupal_strtolower($this->randomName());
     $this->createImageField($field_name, 'article', array('uri_scheme' => $scheme));
     // Create a new node with an image attached.
     $test_image = current($this->drupalGetTestFiles('image'));
