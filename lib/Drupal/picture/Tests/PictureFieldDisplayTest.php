@@ -139,7 +139,7 @@ class PictureFieldDisplayTest extends ImageFieldTestBase {
       // sent by Drupal.
       $this->assertEqual($this->drupalGetHeader('Content-Type'), 'image/png', 'Content-Type header was sent.');
       $this->assertEqual($this->drupalGetHeader('Content-Disposition'), 'inline; filename="' . $test_image->filename . '"', 'Content-Disposition header was sent.');
-      $this->assertTrue(strstr($this->drupalGetHeader('Cache-Control'),'private') !== FALSE, 'Cache-Control header was sent.');
+      $this->assertTrue(strstr($this->drupalGetHeader('Cache-Control'), 'private') !== FALSE, 'Cache-Control header was sent.');
 
       // Log out and try to access the file.
       $this->drupalLogout();

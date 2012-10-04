@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Picture display formatter for image fields.
+ */
+
 use \Drupal\picture\PictureMapping;
 use \Drupal\Core\Template\Attribute;
 
