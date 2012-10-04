@@ -8,8 +8,6 @@
 use \Drupal\picture\PictureMapping;
 use \Drupal\Core\Template\Attribute;
 
-define('PICTURE_CLASS', 'resp-img-picture');
-
 /**
  * Implements hook_permission().
  */
