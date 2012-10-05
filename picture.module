@@ -307,25 +307,38 @@ function picture_field_formatter_view($entity_type, $entity, $field, $instance, 
 
   $breakpoint_styles = array();
   $fallback_image_style = '';
+
   $picture_mapping = entity_load('picture_mapping', $display['settings']['picture_mapping']);
   if ($picture_mapping) {
     foreach ($picture_mapping->mappings as $breakpoint_name => $multipliers) {
+      // Make sure there are multipliers.
       if (!empty($multipliers)) {
-        foreach ($multipliers as $multiplier => $image_style) {
-          if (!empty($image_style)) {
-            if (empty($fallback_image_style)) {
-              $fallback_image_style = $image_style;
+        // Make sure that the breakpoint exists and is enabled.
+        if (isset($picture_mapping->breakpointGroup->breakpoints[$breakpoint_name]) && $picture_mapping->breakpointGroup->breakpoints[$breakpoint_name]->status) {
+        $breakpoint = $picture_mapping->breakpointGroup->breakpoints[$breakpoint_name];
+
+        // Determine the enabled multipliers.
+        $multipliers = array_intersect_key($multipliers, $breakpoint->multipliers);
+          foreach ($multipliers as $multiplier => $image_style) {
+            // Make sure the multiplier still exists.
+            //if (!empty(array_intersect($multiplier, $breakpoint->multipliers))) {
+            if (!empty($image_style)) {
+              // First mapping found is used as fallback.
+              if (empty($fallback_image_style)) {
+                $fallback_image_style = $image_style;
+              }
+              if (!isset($breakpoint_styles[$breakpoint_name])) {
+                $breakpoint_styles[$breakpoint_name] = array();
+              }
+              $breakpoint_styles[$breakpoint_name][$multiplier] = $image_style;
             }
-            if (!isset($breakpoint_styles[$breakpoint_name])) {
-              $breakpoint_styles[$breakpoint_name] = array();
-            }
-            $breakpoint_styles[$breakpoint_name][$multiplier] = $image_style;
           }
         }
       }
     }
   }
 
+  // Check if the user defined a custom fallback image style.
   if (isset($display['settings']['fallback_image_style']) && !empty($display['settings']['fallback_image_style'])) {
     $fallback_image_style = $display['settings']['fallback_image_style'];
   }
