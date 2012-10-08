@@ -307,7 +307,6 @@ function picture_field_formatter_view($entity_type, $entity, $field, $instance, 
 
   $breakpoint_styles = array();
   $fallback_image_style = '';
-
   $picture_mapping = entity_load('picture_mapping', $display['settings']['picture_mapping']);
   if ($picture_mapping) {
     foreach ($picture_mapping->mappings as $breakpoint_name => $multipliers) {
