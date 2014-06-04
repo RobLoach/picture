@@ -184,3 +184,18 @@ function flexslider_picture_join_callback(&$query, $schema, $join_schema) {
     }
   }
 }
+
+/**
+ * Implements hook_flexslider_default_presets_alter().
+ *
+ * Mashed up the default presets of flexslider and picture.
+ */
+function flexslider_picture_flexslider_default_presets_alter(&$defaults) {
+  foreach ($defaults as $name => &$settings) {
+    $default_preset = ctools_get_default_object('flexslider_picture_optionset', $name);
+    if (!empty($default_preset)) {
+      $settings->imagestyle_type = $default_preset->imagestyle_type;
+      $settings->mapping = $default_preset->mapping;
+    }
+  }
+}
