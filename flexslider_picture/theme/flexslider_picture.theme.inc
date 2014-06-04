@@ -49,8 +49,6 @@ function template_preprocess_flexslider_picture_list(&$vars) {
           '#theme' => 'picture',
           '#style_name' => $optionset->imagestyle_normal,
           '#uri' => $item['item']['uri'],
-          '#height' => $item['item']['height'],
-          '#width' => $item['item']['width'],
           '#alt' => $item['item']['alt'],
           '#title' => $item['item']['title'],
           '#breakpoints' => $breakpoint_styles,
@@ -66,8 +64,6 @@ function template_preprocess_flexslider_picture_list(&$vars) {
             '#colorbox_image_style' => $colorbox_fallback_image_style,
             '#colorbox' => $colorbox_breakpoints,
             '#colorbox_group_id' => $colorbox_group_id,
-            '#width' => $item['item']['width'],
-            '#height' => $item['item']['height'],
             '#alt' => $item['item']['alt'],
             '#title' => $item['item']['title'],
           );
@@ -99,6 +95,7 @@ function theme_flexslider_picture_list(&$vars) {
           'item' => $slide,
           'thumb' => isset($item['thumb']) ? $item['thumb'] : NULL,
           'settings' => $vars['settings'],
+          'caption' => $item['caption'],
         ));
       }
       $output .= "</$type>";
