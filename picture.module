@@ -153,6 +153,7 @@ function picture_mapping_save(&$mapping) {
  * Implements hook_library().
  */
 function picture_library() {
+  $libraries = array();
   switch (variable_get('picture_implementation', PICTURE_IMPLEMENTATION_DEFAULT)) {
     case PICTURE_IMPLEMENTATION_PICTUREFILL2:
       $libraries['picturefill'] = array(
