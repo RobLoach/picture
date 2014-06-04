@@ -1139,13 +1139,13 @@ function picture_image_uri($src) {
         $unwanted_part = 'system/files/styles/' . $src_exploded[3] . '/private/';
         $uri = str_replace($unwanted_part, 'private://', $src);
         $uri = file_stream_wrapper_uri_normalize($uri);
-        return $uri;
+        return urldecode($uri);
       } else {
         // No image style recognized; must be an original.
         $unwanted_part = 'system/files/';
         $uri = str_replace($unwanted_part, 'private://', $src);
         $uri = file_stream_wrapper_uri_normalize($uri);
-        return $uri;
+        return urldecode($uri);
       }
     // It's not a managed/private file.
     } else {
@@ -1172,7 +1172,7 @@ function picture_image_uri($src) {
   $uri = $the_scheme . '://' . str_replace($matches[$the_scheme], '', $src);
   $uri = file_stream_wrapper_uri_normalize($uri);
 
-  return $uri;
+  return urldecode($uri);
 }
 
 /**
