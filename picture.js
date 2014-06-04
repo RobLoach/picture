@@ -9,7 +9,7 @@ if (typeof Drupal !== 'undefined' && typeof jQuery !== 'undefined') {
         // If this is an opened colorbox ensure the content dimensions are set
         // properly. colorbox.js of the colorbox modules sets #cboxLoadedContent
         // as context.
-        if (context == '#cboxLoadedContent') {
+        if (context === '#cboxLoadedContent' && $(context).find('picture, [data-picture]').length) {
           // Try to resize right away.
           $.colorbox.resize();
           // Make sure the colorbox resizes always when the image is changed.
