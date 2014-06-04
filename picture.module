@@ -1126,6 +1126,34 @@ function picture_image_uri($src) {
     }
   }
 
+  // No file stream wrapper is starting with the image src.
+  // So it's not a public file.
+  if (empty($matches)) {
+    // Check for managed/private file with relative path like 'system/files/...'.
+    $src_exploded = explode ('/', $src);
+    if ($src_exploded[0] == 'system' && $src_exploded[1] == 'files') {
+      // Managed/private file recognized.
+      // Check for image style derivatives.
+      if ($src_exploded[2] == 'styles') {
+        // Image style recognized.
+        $unwanted_part = 'system/files/styles/' . $src_exploded[3] . '/private/';
+        $uri = str_replace($unwanted_part, 'private://', $src);
+        $uri = file_stream_wrapper_uri_normalize($uri);
+        return $uri;
+      } else {
+        // No image style recognized; must be an original.
+        $unwanted_part = 'system/files/';
+        $uri = str_replace($unwanted_part, 'private://', $src);
+        $uri = file_stream_wrapper_uri_normalize($uri);
+        return $uri;
+      }
+    // It's not a managed/private file.
+    } else {
+      // Can't figure out the Drupal uri.
+      return FALSE;
+    }
+  }
+
   // If one file scheme directory is a subdirectory of another file
   // scheme directory, choose the longer one. This issue is possible with
   // the following scenario:
@@ -1134,10 +1162,6 @@ function picture_image_uri($src) {
   // image src: /sites/default/files/private/the-image.jpg
   // In this example, the intended scheme would be 'private'.
 
-  if (empty($matches)) {
-    // Can't figure out the Drupal uri.
-    return FALSE;
-  }
   // Find the length of each matching directory path.
   $lengths = array_map('strlen', $matches);
 
