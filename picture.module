@@ -959,7 +959,7 @@ function _picture_filter_process($text, $filter) {
       // Create the render array expected by theme_picture_formatter.
       $image_render_array = _picture_filter_prepare_image($image);
       if (!$image_render_array) {
-        return $text;
+        continue;
       }
 
       // Get the responsive markup for this image.
