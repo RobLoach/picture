@@ -377,14 +377,27 @@ function picture_field_formatter_info() {
 function picture_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
-
-  $element['picture_group'] = array(
-    '#title' => t('Picture group'),
-    '#type' => 'select',
-    '#default_value' => $settings['picture_group'],
-    '#required' => TRUE,
-    '#options' => picture_get_mapping_options(),
-  );
+  $options = picture_get_mapping_options();
+  if ($options) {
+    $element['picture_group'] = array(
+      '#title' => t('Picture group'),
+      '#type' => 'select',
+      '#default_value' => $settings['picture_group'],
+      '#required' => TRUE,
+      '#options' => $options,
+    );
+  }
+  // No picture mappings.
+  else {
+    $element['picture_group'] = array(
+      '#title' => t('Picture group'),
+      '#type' => 'item',
+      '#markup' => t(
+        'There are no picture groups defined. !create_link.',
+        array('!create_link' => l(t('Create a picture group'), 'admin/config/media/picture'))
+      )
+    );
+  }
 
   $image_styles = image_style_options(FALSE);
   $element['fallback_image_style'] = array(
@@ -447,7 +460,7 @@ function picture_field_formatter_settings_summary($field, $instance, $view_mode)
 
   $summary = array();
 
-  if (isset($settings['picture_group'])) {
+  if (isset($settings['picture_group']) && !empty($settings['picture_group'])) {
     $picture_mapping = picture_mapping_load($settings['picture_group']);
     $breakpoint_group = breakpoints_breakpoint_group_load($picture_mapping->breakpoint_group);
     if ($breakpoint_group) {
