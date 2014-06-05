@@ -1207,14 +1207,6 @@ function picture_ckeditor_plugin() {
 }
 
 /**
- * Implements hook_uninstall().
- */
-function picture_uninstall() {
-  variable_del('picture_ckeditor_groups');
-  variable_del('picture_ckeditor_label');
-}
-
-/**
  * Wrapper around image_style_url() so we can return an empty image.
  */
 function _picture_image_style_url($style_name, $path) {

@@ -58,6 +58,14 @@ function picture_schema() {
 }
 
 /**
+ * Implements hook_uninstall().
+ */
+function picture_uninstall() {
+  variable_del('picture_ckeditor_groups');
+  variable_del('picture_ckeditor_label');
+}
+
+/**
  * Update to the new file display formatter provided by file_entity.module.
  */
 function picture_update_7001() {
