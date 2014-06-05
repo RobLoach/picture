@@ -1038,13 +1038,12 @@ function _picture_filter_prepare_image($image) {
   return $image_render_array;
 
 }
+
 /**
- * Implements picture filter tips callback.
+ * Implements callback_filter_tips().
  */
 function _picture_filter_tips($filter, $format, $long = FALSE) {
-  $tips = 'Images with a data-picture-group attribute will be responsive, with a file size appropriate for the browser width.';
-
-  return $tips;
+  return t('Images with a data-picture-group attribute will be responsive, with a file size appropriate for the browser width.');
 }
 
 /**
