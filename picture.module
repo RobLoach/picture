@@ -294,22 +294,6 @@ function picture_empty_array() {
 }
 
 /**
- * Implements hook_ctools_plugin_api().
- *
- * Lets CTools know which plugin APIs are implemented by picture module.
- */
-function picture_ctools_plugin_api($owner, $api) {
-  static $api_versions = array(
-    'file_entity' => array(
-      'file_default_displays' => 1,
-    ),
-  );
-  if (isset($api_versions[$owner][$api])) {
-    return array('version' => $api_versions[$owner][$api]);
-  }
-}
-
-/**
  * Validate mappings.
  */
 function picture_mapping_validate($mapping) {
