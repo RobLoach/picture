@@ -66,6 +66,7 @@ function template_preprocess_flexslider_picture_list(&$vars) {
             '#colorbox_group_id' => $colorbox_group_id,
             '#alt' => $item['item']['alt'],
             '#title' => $item['item']['title'],
+            '#breakpoints' => $breakpoint_styles,
           );
         }
         if (!isset($item['thumb'])) {
@@ -95,7 +96,7 @@ function theme_flexslider_picture_list(&$vars) {
           'item' => $slide,
           'thumb' => isset($item['thumb']) ? $item['thumb'] : NULL,
           'settings' => $vars['settings'],
-          'caption' => $item['caption'],
+          'caption' => isset($item['caption']) ? $item['caption'] : '',
         ));
       }
       $output .= "</$type>";
