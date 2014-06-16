@@ -229,13 +229,16 @@ function picture_admin_settings($form, &$form_state) {
       '#default_value' => variable_get('picture_updated_to_file_entity_2', FALSE),
     );
   }
-  $form = system_settings_form($form);
   $form['#submit'][] = 'picture_admin_settings_submit';
+  $form = system_settings_form($form);
   return $form;
 }
 
-function picture_admin_settings_submit() {
-  variable_set('picture_updated_to_file_entity_2', _picture_update_to_file_entity_2());
+function picture_admin_settings_submit($form, &$form_state) {
+  if ($form_state['values']['picture_updated_to_file_entity_2']) {
+    variable_set('picture_updated_to_file_entity_2', _picture_update_to_file_entity_2());
+  }
+  form_set_value($form['picture_updated_to_file_entity_2'], variable_get('picture_updated_to_file_entity_2', FALSE), $form_state);
 }
 
 /**
@@ -253,18 +256,6 @@ function _picture_update_to_file_entity_2() {
   $entity_info = entity_get_info('file');
   $types = file_type_load_all();
   foreach ($types as $file_type) {
-    //file_picture
-    // Retrieve available formatters for this file type and load all configured
-    // filters for existing text formats.
-    $formatters = file_info_formatter_types();
-    foreach ($formatters as $name => $formatter) {
-      if (isset($formatter['mime types'])) {
-        if (file_entity_match_mimetypes($formatter['mime types'], $file_type->mimetypes)) {
-          continue;
-        }
-        unset($formatters[$name]);
-      }
-    }
     $view_modes = array('default' => array('label' => t('Default'))) + $entity_info['view modes'];
     foreach (array_keys($view_modes) as $view_mode) {
       $current_displays = file_displays_load($file_type->type, $view_mode, TRUE);
@@ -280,6 +271,12 @@ function _picture_update_to_file_entity_2() {
           unset($current_displays['file_picture']);
           file_display_save($display);
         }
+      }
+      elseif (isset($current_displays['file_field_picture'])) {
+        $display = $current_displays['file_field_picture'];
+        $display->settings['picture_mapping'] = isset($display->settings['picture_mapping']) ? $display->settings['picture_mapping'] : $display->settings['picture_group'];
+        unset($display->settings['picture_group']);
+        file_display_save($display);
       }
     }
   }
