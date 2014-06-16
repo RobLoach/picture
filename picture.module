@@ -15,6 +15,10 @@ define('PICTURE_IMPLEMENTATION_PICTUREFILL', 'picturefill');
 define('PICTURE_IMPLEMENTATION_WEBLINC', 'weblinc');
 define('PICTURE_IMPLEMENTATION_DEFAULT', 'picturefill');
 
+if (!variable_get('picture_updated_to_file_entity_2', FALSE)) {
+  module_load_include('file_entity_1.inc', 'picture');
+}
+
 /**
  * Implements hook_permission().
  */

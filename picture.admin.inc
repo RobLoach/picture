@@ -222,8 +222,68 @@ function picture_admin_settings($form, &$form_state) {
     ),
     '#default_value' => variable_get('picture_implementation', PICTURE_IMPLEMENTATION_DEFAULT),
   );
+  if (module_exists('file_entity') && function_exists('file_type_load_all') && !variable_get('picture_updated_to_file_entity_2', FALSE)) {
+    $form['picture_updated_to_file_entity_2'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Update the file formatter to version 2 of the File Entity module'),
+      '#default_value' => variable_get('picture_updated_to_file_entity_2', FALSE),
+    );
+  }
+  $form = system_settings_form($form);
+  $form['#submit'][] = 'picture_admin_settings_submit';
+  return $form;
+}
 
-  return system_settings_form($form);
+function picture_admin_settings_submit() {
+  variable_set('picture_updated_to_file_entity_2', _picture_update_to_file_entity_2());
+}
+
+/**
+ * Update picture module to version 2 of File Entity module.
+ */
+function _picture_update_to_file_entity_2() {
+  // File Entity is not installed or the installed version is not version 2.
+  if (!module_exists('file_entity') || !function_exists('file_type_load_all')) {
+    return FALSE;
+  }
+  // Picture was already updated.
+  if (variable_get('picture_updated_to_file_entity_2', FALSE)) {
+    return TRUE;
+  }
+  $entity_info = entity_get_info('file');
+  $types = file_type_load_all();
+  foreach ($types as $file_type) {
+    //file_picture
+    // Retrieve available formatters for this file type and load all configured
+    // filters for existing text formats.
+    $formatters = file_info_formatter_types();
+    foreach ($formatters as $name => $formatter) {
+      if (isset($formatter['mime types'])) {
+        if (file_entity_match_mimetypes($formatter['mime types'], $file_type->mimetypes)) {
+          continue;
+        }
+        unset($formatters[$name]);
+      }
+    }
+    $view_modes = array('default' => array('label' => t('Default'))) + $entity_info['view modes'];
+    foreach (array_keys($view_modes) as $view_mode) {
+      $current_displays = file_displays_load($file_type->type, $view_mode, TRUE);
+      if (isset($current_displays['file_picture']) && $current_displays['file_picture']->status) {
+        if (!isset($current_displays['file_field_picture']) || !$current_displays['file_field_picture']->status) {
+          $display = clone $current_displays['file_picture'];
+          $display->name = isset($current_displays['file_field_picture']) ? $current_displays['file_field_picture']->name : $file_type->type . '__' . $view_mode . '__file_field_picture';
+          unset($display->settings['alt']);
+          unset($display->settings['title']);
+          $display->settings['image_link'] = '';
+          $display->settings['colorbox'] = $display->settings['picture_group'];
+          $current_displays['file_field_picture'] = $display;
+          unset($current_displays['file_picture']);
+          file_display_save($display);
+        }
+      }
+    }
+  }
+  return TRUE;
 }
 
 /**
