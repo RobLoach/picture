@@ -39,7 +39,10 @@ function picture_file_formatter_picture_view($file, $display, $langcode) {
     return;
   }
 
-  if (file_entity_file_is_readable($file)) {
+  $scheme = file_uri_scheme($file->uri);
+  $wrappers = file_get_stream_wrappers(STREAM_WRAPPERS_READ);
+  $readable = !empty($wrappers[$scheme]);
+  if ($readable) {
     $fallback_image_style = '';
     $group_name = $display['settings']['picture_group'];
     $mappings = picture_mapping_load($group_name);
@@ -59,6 +62,22 @@ function picture_file_formatter_picture_view($file, $display, $langcode) {
       'clear' => 1,
       'sanitize' => 0,
     );
+    $dimensions = array(
+      'width' => '',
+      'height' => '',
+    );
+    if (isset($file->image_dimensions['width'])) {
+      $dimensions['width'] = $file->image_dimensions['width'];
+    }
+    elseif (isset($file->metadata['width'])) {
+      $dimensions['width'] = $file->metadata['width'];
+    }
+    if (isset($file->image_dimensions['height'])) {
+      $dimensions['height'] = $file->image_dimensions['height'];
+    }
+    elseif (isset($file->metadata['height'])) {
+      $dimensions['height'] = $file->metadata['height'];
+    }
     $element = array(
       '#theme' => 'picture_formatter',
       '#attached' => array('library' => array(
@@ -70,11 +89,9 @@ function picture_file_formatter_picture_view($file, $display, $langcode) {
         'style_name' => $fallback_image_style,
         'path' => $file->uri,
         'uri' => $file->uri,
-        'width' => isset($file->image_dimensions['width']) ? $file->image_dimensions['width'] : $file->metadata['width'],
-        'height' => isset($file->image_dimensions['height']) ? $file->image_dimensions['height'] : $file->metadata['height'],
         'alt' => token_replace($display['settings']['alt'], array('file' => $file), $replace_options),
         'title' => token_replace($display['settings']['title'], array('file' => $file), $replace_options),
-      ),
+      ) + $dimensions,
       '#image_style' => $fallback_image_style,
       '#breakpoints' => $breakpoint_styles,
       '#path' => '',
