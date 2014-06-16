@@ -238,7 +238,9 @@ function picture_admin_settings_submit($form, &$form_state) {
   if (isset($form_state['values']['picture_updated_to_file_entity_2']) && $form_state['values']['picture_updated_to_file_entity_2']) {
     variable_set('picture_updated_to_file_entity_2', _picture_update_to_file_entity_2());
   }
-  form_set_value($form['picture_updated_to_file_entity_2'], variable_get('picture_updated_to_file_entity_2', FALSE), $form_state);
+  if (isset($form['picture_updated_to_file_entity_2'])) {
+    form_set_value($form['picture_updated_to_file_entity_2'], variable_get('picture_updated_to_file_entity_2', FALSE), $form_state);
+  }
 }
 
 /**
