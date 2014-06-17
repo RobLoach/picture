@@ -72,3 +72,29 @@ function picture_update_7001() {
   module_load_include('admin.inc', 'picture');
   variable_set('picture_updated_to_file_entity_2', _picture_update_to_file_entity_2());
 }
+
+/**
+ * Update field formatters to the new colorbox settings.
+ */
+function picture_update_7002() {
+  $fields = field_read_fields(array('type' => 'image'));
+  foreach ($fields as $field) {
+    $instances = field_read_instances(array('field_id' => $field['id']));
+    foreach ($instances as $instance) {
+      foreach ($instance['display'] as $view_mode => $view_mode_settings) {
+        if ($view_mode_settings['type'] == 'picture') {
+          $colorbox_group = $instance['display'][$view_mode]['settings']['colorbox'];
+          $instance['display'][$view_mode]['settings']['colorbox_settings'] = array(
+            'colorbox_group' => $colorbox_group,
+            'colorbox_gallery' => 'none',
+            'colorbox_gallery_custom' => '',
+            'colorbox_caption' => 'none',
+            'colorbox_caption_custom' => '',
+            'colorbox_multivalue_index' => NULL,
+          );
+        }
+      }
+      field_update_instance($instance);
+    }
+  }
+}
