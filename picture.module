@@ -924,17 +924,23 @@ function theme_picture($variables) {
   // Make sure that width and height are proper values
   // If they exists we'll output them
   // @see http://www.w3.org/community/respimg/2012/06/18/florians-compromise/
-  if (isset($variables['width']) && empty($variables['width'])) {
+  if (variable_get('picture_implementation', PICTURE_IMPLEMENTATION_DEFAULT) !== PICTURE_IMPLEMENTATION_PICTUREFILL2) {
+    if (isset($variables['width']) && empty($variables['width'])) {
+      unset($variables['width']);
+      unset($variables['height']);
+    }
+    elseif (isset($variables['height']) && empty($variables['height'])) {
+      unset($variables['width']);
+      unset($variables['height']);
+    }
+    if (isset($variables['metadata']['width']) && isset($variables['metadata']['height'])) {
+      $variables['width'] = $variables['metadata']['width'];
+      $variables['height'] = $variables['metadata']['height'];
+    }
+  }
+  else {
     unset($variables['width']);
     unset($variables['height']);
-  }
-  elseif (isset($variables['height']) && empty($variables['height'])) {
-    unset($variables['width']);
-    unset($variables['height']);
-  }
-  if (isset($variables['metadata']['width']) && isset($variables['metadata']['height'])) {
-    $variables['width'] = $variables['metadata']['width'];
-    $variables['height'] = $variables['metadata']['height'];
   }
 
   $sources = array();
