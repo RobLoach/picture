@@ -40,7 +40,9 @@ function template_preprocess_image_sizes_formatter(&$variables) {
   else {
     $path = $item->uri;
   }
-  $variables['image']['#uri'] = _responsive_image_image_style_url($variables['fallback_image_style'], $path);
+  if ($variables['fallback_image_style'] !== RESPONSIVE_IMAGE_EMPTY_IMAGE) {
+    $variables['image']['#uri'] = _responsive_image_image_style_url($variables['fallback_image_style'], $path);
+  }
   $variables['image']["#alt"] = $item->alt;
   $variables['image']['#sizes'] = $variables['sizes'];
 
