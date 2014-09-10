@@ -1145,10 +1145,13 @@ function theme_picture_source($variables) {
  */
 function picture_get_image_dimensions($variables, $multiplier = 1) {
   // Determine the dimensions of the styled image.
-  $dimensions = array(
-    'width' => $variables['width'],
-    'height' => $variables['height'],
-  );
+  $dimensions = array();
+  if (isset($variables['width'])) {
+    $dimensions['width'] = $variables['width'];
+  }
+  if (isset($variables['height'])) {
+    $dimensions['height'] = $variables['height'];
+  }
 
   if ($variables['style_name'] == PICTURE_EMPTY_IMAGE) {
     $dimensions = array(
