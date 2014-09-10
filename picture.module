@@ -1225,6 +1225,7 @@ function _picture_filter_prepare_image($image) {
   // Make sure the closing tag is right.
   $image = str_replace('/>', '>', $image);
   $image = str_replace('>', ' />', $image);
+  $image = htmlspecialchars($image);
 
   // Parse the tag as xml.
   $xml = simplexml_load_string('<image>' . html_entity_decode($image, ENT_QUOTES, "utf-8") . '</image>');
