@@ -178,6 +178,11 @@ class ImageSizesFormatter extends ImageFormatterBase {
 
         $elements[$delta] = array(
           '#theme' => 'image_sizes_formatter',
+          '#attached' => array(
+            'library' => array(
+              'core/picturefill',
+            )
+          ),
           '#item' => $item,
           '#item_attributes' => $item_attributes,
           '#image_styles' => array_filter($this->getSetting('image_styles')),

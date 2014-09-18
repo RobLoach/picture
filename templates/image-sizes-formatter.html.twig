@@ -15,7 +15,19 @@
  */
 #}
 {% if url %}
-  <a href="{{ url }}">{{ image }}</a>
+  <a href="{{ url }}">
+    <picture>
+      <!--[if IE 9]><video style="display: none;"><![endif]-->
+      {{ source }}
+      <!--[if IE 9]></video><![endif]-->
+      {{ fallback_image }}
+    </picture>
+  </a>
 {% else %}
-  {{ image }}
+  <picture>
+    <!--[if IE 9]><video style="display: none;"><![endif]-->
+    {{ source }}
+    <!--[if IE 9]></video><![endif]-->
+    {{ fallback_image }}
+  </picture>
 {% endif %}
