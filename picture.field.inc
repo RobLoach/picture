@@ -48,9 +48,13 @@ function template_preprocess_image_sizes_formatter(&$variables) {
 
     // Add the image source with its width descriptor.
     // http://www.w3.org/html/wg/drafts/html/master/embedded-content.html#image-candidate-string
-    $srcset[] = _responsive_image_image_style_url($image_style_name, $path) . ' ' . $dimensions['width'] . 'w';
+    $srcset[$dimensions['width']] = _responsive_image_image_style_url($image_style_name, $path) . ' ' . $dimensions['width'] . 'w';
   }
-  $variables['source']['#srcset'] = implode(',', $srcset);
+
+  // Sort by dimension.
+  ksort($srcset);
+
+  $variables['source']['#srcset'] = implode(', ', $srcset);
   $variables['fallback_image'] = array(
     '#theme' => 'image',
   );
