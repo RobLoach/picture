@@ -14,6 +14,7 @@ function picture_entity_type_alter(array &$entity_types) {
   /* @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
   $entity_types['responsive_image_mapping']->setFormClass('add', 'Drupal\picture\PictureMappingForm');
   $entity_types['responsive_image_mapping']->setFormClass('edit', 'Drupal\picture\PictureMappingForm');
+  $entity_types['responsive_image_mapping']->setFormClass('duplicate', 'Drupal\picture\PictureMappingForm');
 }
 
 
