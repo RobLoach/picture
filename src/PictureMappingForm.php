@@ -93,6 +93,7 @@ class PictureMappingForm extends ResponsiveImageMappingForm {
           '#states' => array(
             'visible' => array(
               ':input[name="keyed_mappings[' . $breakpoint_id . '][' . $multiplier . '][image_mapping_type]"]' => array('value' => 'sizes'),
+              ':input[name="keyed_mappings[' . $breakpoint_id . '][' . $multiplier . '][sizes_advanced]"]' => array('checked' => FALSE),
             ),
           ),
           '#attributes' => array(
@@ -107,16 +108,6 @@ class PictureMappingForm extends ResponsiveImageMappingForm {
         );
 
         // Advanced sizes mode.
-        $form['keyed_mappings'][$breakpoint_id][$multiplier]['sizes_advanced'] = array(
-          '#title' => $this->t('Use the advanced mode'),
-          '#type' => 'checkbox',
-          '#default_value' => isset($mapping_definition['sizes_advanced']) ? $mapping_definition['sizes_advanced'] : FALSE,
-          '#states' => array(
-            'visible' => array(
-              ':input[name="keyed_mappings[' . $breakpoint_id . '][' . $multiplier . '][image_mapping_type]"]' => array('value' => 'sizes'),
-            ),
-          ),
-        );
         $form['keyed_mappings'][$breakpoint_id][$multiplier]['sizes'] = array(
           '#type' => 'textfield',
           '#title' => $this->t('Sizes'),
@@ -131,13 +122,23 @@ class PictureMappingForm extends ResponsiveImageMappingForm {
         );
         $form['keyed_mappings'][$breakpoint_id][$multiplier]['sizes_image_styles'] = array(
           '#title' => $this->t('Image styles'),
-          '#type' => 'checkboxes',
+          '#type' => 'select',
+          '#multiple' => TRUE,
           '#options' => array_diff_key($image_styles, array('' => '')),
           '#default_value' => isset($mapping_definition['sizes_image_styles']) ? $mapping_definition['sizes_image_styles'] : array(),
           '#states' => array(
             'visible' => array(
               ':input[name="keyed_mappings[' . $breakpoint_id . '][' . $multiplier . '][image_mapping_type]"]' => array('value' => 'sizes'),
-              ':input[name="keyed_mappings[' . $breakpoint_id . '][' . $multiplier . '][sizes_advanced]"]' => array('checked' => TRUE),
+            ),
+          ),
+        );
+        $form['keyed_mappings'][$breakpoint_id][$multiplier]['sizes_advanced'] = array(
+          '#title' => $this->t('Use the advanced mode'),
+          '#type' => 'checkbox',
+          '#default_value' => isset($mapping_definition['sizes_advanced']) ? $mapping_definition['sizes_advanced'] : FALSE,
+          '#states' => array(
+            'visible' => array(
+              ':input[name="keyed_mappings[' . $breakpoint_id . '][' . $multiplier . '][image_mapping_type]"]' => array('value' => 'sizes'),
             ),
           ),
         );
