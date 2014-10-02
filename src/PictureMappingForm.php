@@ -34,22 +34,12 @@ class PictureMappingForm extends ResponsiveImageMappingForm {
     $breakpoints = $this->breakpointManager->getBreakpointsByGroup($this->entity->getBreakpointGroup());
     foreach ($breakpoints as $breakpoint_id => $breakpoint) {
       foreach ($breakpoint->getMultipliers() as $multiplier) {
-        $label = $multiplier . ' ' . $breakpoint->getLabel() . ' [' . $breakpoint->getMediaQuery() . ']';
+        $label = $breakpoint->getLabel() . ', ' . $multiplier . ' <code class="media-query">' . $breakpoint->getMediaQuery() . '</code>';
         $form['keyed_mappings'][$breakpoint_id][$multiplier] = array(
-          '#type' => 'details',
+          '#type' => 'fieldset',
           '#title' => $label,
         );
         $mapping_definition = $this->entity->getMappingDefinition($breakpoint_id, $multiplier);
-        $form['keyed_mappings'][$breakpoint_id][$multiplier]['image_mapping_type'] = array(
-          '#title' => $this->t('Image mapping type'),
-          '#type' => 'radios',
-          '#options' => array(
-            '_none' => $this->t('Do not use this breakpoint'),
-            'image_style' => $this->t('Use image styles'),
-            'sizes' => $this->t('Use the sizes attribute'),
-          ),
-          '#default_value' => isset($mapping_definition['image_mapping_type']) ? $mapping_definition['image_mapping_type'] : '_none',
-        );
         $form['keyed_mappings'][$breakpoint_id][$multiplier]['image_style'] = array(
           '#type' => 'select',
           '#title' => $this->t('Image style'),
@@ -57,8 +47,27 @@ class PictureMappingForm extends ResponsiveImageMappingForm {
           '#default_value' => isset($mapping_definition['image_style']) ? $mapping_definition['image_style'] : array(),
           '#description' => $this->t('Select an image style for this breakpoint.'),
           '#states' => array(
-            'visible' => array(
+            'enabled' => array(
               ':input[name="keyed_mappings[' . $breakpoint_id . '][' . $multiplier . '][image_mapping_type]"]' => array('value' => 'image_style'),
+            ),
+          ),
+        );
+        $form['keyed_mappings'][$breakpoint_id][$multiplier]['image_mapping_type'] = array(
+          '#type' => 'radios',
+          '#options' => array(
+            'image_style' => $this->t('Use image styles'),
+            '_none' => $this->t('Do not use this breakpoint'),
+            'sizes' => $this->t('Use the sizes attribute'),
+          ),
+          '#default_value' => isset($mapping_definition['image_mapping_type']) ? $mapping_definition['image_mapping_type'] : 'image_style',
+        );
+        $form['keyed_mappings'][$breakpoint_id][$multiplier]['sizes_advanced'] = array(
+          '#title' => $this->t('Use the advanced mode'),
+          '#type' => 'checkbox',
+          '#default_value' => isset($mapping_definition['sizes_advanced']) ? $mapping_definition['sizes_advanced'] : FALSE,
+          '#states' => array(
+            'visible' => array(
+              ':input[name="keyed_mappings[' . $breakpoint_id . '][' . $multiplier . '][image_mapping_type]"]' => array('value' => 'sizes'),
             ),
           ),
         );
@@ -70,6 +79,7 @@ class PictureMappingForm extends ResponsiveImageMappingForm {
           '#states' => array(
             'visible' => array(
               ':input[name="keyed_mappings[' . $breakpoint_id . '][' . $multiplier . '][image_mapping_type]"]' => array('value' => 'sizes'),
+              ':input[name="keyed_mappings[' . $breakpoint_id . '][' . $multiplier . '][sizes_advanced]"]' => array('checked' => TRUE),
             ),
           ),
         );
@@ -81,6 +91,7 @@ class PictureMappingForm extends ResponsiveImageMappingForm {
           '#states' => array(
             'visible' => array(
               ':input[name="keyed_mappings[' . $breakpoint_id . '][' . $multiplier . '][image_mapping_type]"]' => array('value' => 'sizes'),
+              ':input[name="keyed_mappings[' . $breakpoint_id . '][' . $multiplier . '][sizes_advanced]"]' => array('checked' => TRUE),
             ),
           ),
         );
