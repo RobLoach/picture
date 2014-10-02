@@ -29,17 +29,26 @@ class PictureMappingForm extends ResponsiveImageMappingForm {
   public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
 
-    $image_styles = image_style_options(TRUE);
+    $image_styles = image_style_options(FALSE);
     $image_styles[RESPONSIVE_IMAGE_EMPTY_IMAGE] = $this->t('- empty image -');
+
+//    $form['#attached']['css'][drupal_get_path('module', 'picture') . '/css/picture.admin.css'] = array();
+//    $form['#attached']['js'][drupal_get_path('module', 'picture') . '/js/picture.admin.js'] = array();
+    $form['#attached']['library'][] = 'picture/drupal.picture';
     $breakpoints = $this->breakpointManager->getBreakpointsByGroup($this->entity->getBreakpointGroup());
     foreach ($breakpoints as $breakpoint_id => $breakpoint) {
       foreach ($breakpoint->getMultipliers() as $multiplier) {
         $label = $breakpoint->getLabel() . ', ' . $multiplier . ' <code class="media-query">' . $breakpoint->getMediaQuery() . '</code>';
         $form['keyed_mappings'][$breakpoint_id][$multiplier] = array(
-          '#type' => 'fieldset',
+          '#type' => 'details',
           '#title' => $label,
+          '#attributes' => array(
+            'class' => array('responsive-image-mapping-breakpoint'),
+          ),
         );
         $mapping_definition = $this->entity->getMappingDefinition($breakpoint_id, $multiplier);
+
+        // Use image style by default.
         $form['keyed_mappings'][$breakpoint_id][$multiplier]['image_style'] = array(
           '#type' => 'select',
           '#title' => $this->t('Image style'),
@@ -52,6 +61,8 @@ class PictureMappingForm extends ResponsiveImageMappingForm {
             ),
           ),
         );
+
+        // Show other options.
         $form['keyed_mappings'][$breakpoint_id][$multiplier]['image_mapping_type'] = array(
           '#type' => 'radios',
           '#options' => array(
@@ -61,6 +72,41 @@ class PictureMappingForm extends ResponsiveImageMappingForm {
           ),
           '#default_value' => isset($mapping_definition['image_mapping_type']) ? $mapping_definition['image_mapping_type'] : 'image_style',
         );
+
+        // Simple sizes mode by default.
+        $form['keyed_mappings'][$breakpoint_id][$multiplier]['size'] = array(
+          '#type' => 'number',
+          '#title' => $this->t('Relative width of the image'),
+          '#default_value' => isset($mapping_definition['sizes']) ? $mapping_definition['sizes'] : '100',
+          '#min' => 0,
+          '#max' => 100,
+          '#description' => $this->t('Enter the relative width of the image in regards to the browser width.'),
+          '#states' => array(
+            'visible' => array(
+              ':input[name="keyed_mappings[' . $breakpoint_id . '][' . $multiplier . '][image_mapping_type]"]' => array('value' => 'sizes'),
+              ':input[name="keyed_mappings[' . $breakpoint_id . '][' . $multiplier . '][sizes_advanced]"]' => array('checked' => FALSE),
+            ),
+          ),
+        );
+        $form['keyed_mappings'][$breakpoint_id][$multiplier]['preview_container'] = array(
+          '#type' => 'container',
+          '#states' => array(
+            'visible' => array(
+              ':input[name="keyed_mappings[' . $breakpoint_id . '][' . $multiplier . '][image_mapping_type]"]' => array('value' => 'sizes'),
+            ),
+          ),
+          '#attributes' => array(
+            'class' => array('responsive-image-mapping-preview'),
+          ),
+        );
+        $form['keyed_mappings'][$breakpoint_id][$multiplier]['preview_container']['preview'] = array(
+          '#theme' => 'image',
+          '#uri' => \Drupal::config('image.settings')->get('preview_image'),
+          '#alt' => t('Sample original image'),
+          '#title' => '',
+        );
+
+        // Advanced sizes mode.
         $form['keyed_mappings'][$breakpoint_id][$multiplier]['sizes_advanced'] = array(
           '#title' => $this->t('Use the advanced mode'),
           '#type' => 'checkbox',

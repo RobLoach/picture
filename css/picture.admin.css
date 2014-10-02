@@ -1,0 +1,24 @@
+/**
+ * @file
+ * Stylesheet for the Responsive Image module.
+ */
+
+.responsive-image-mapping-breakpoint .media-query {
+  float: right;
+  font-size: 0.9em;
+  font-weight: normal;
+  margin: 0;
+}
+
+.responsive-image-mapping-preview {
+  border: solid 1px #232323;
+  display: block;
+  margin-left: 15%;
+  padding: 0.3em;
+  width: 70%;
+}
+.responsive-image-mapping-preview img {
+  display: block;
+  margin: 1em auto;
+  max-width: 100%;
+}
