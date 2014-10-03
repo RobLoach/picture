@@ -13,9 +13,10 @@
 .responsive-image-mapping-preview {
   border: solid 1px #232323;
   display: block;
-  margin-left: 15%;
-  padding: 0.3em;
-  width: 70%;
+  margin-left: 0 auto;
+  padding: 10px;
+  width: 300px;
+  height: 250px;
 }
 .responsive-image-mapping-preview img {
   display: block;
