@@ -32,8 +32,6 @@ class PictureMappingForm extends ResponsiveImageMappingForm {
     $image_styles = image_style_options(FALSE);
     $image_styles[RESPONSIVE_IMAGE_EMPTY_IMAGE] = $this->t('- empty image -');
 
-//    $form['#attached']['css'][drupal_get_path('module', 'picture') . '/css/picture.admin.css'] = array();
-//    $form['#attached']['js'][drupal_get_path('module', 'picture') . '/js/picture.admin.js'] = array();
     $form['#attached']['library'][] = 'picture/drupal.picture';
     $breakpoints = $this->breakpointManager->getBreakpointsByGroup($this->entity->getBreakpointGroup());
     foreach ($breakpoints as $breakpoint_id => $breakpoint) {
@@ -41,7 +39,7 @@ class PictureMappingForm extends ResponsiveImageMappingForm {
         $label = $breakpoint->getLabel() . ', ' . $multiplier . ' <code class="media-query">' . $breakpoint->getMediaQuery() . '</code>';
         $form['keyed_mappings'][$breakpoint_id][$multiplier] = array(
           '#type' => 'details',
-          '#title' => $label,
+          '#title' => SafeMarkup::checkAdminXss($label),
           '#attributes' => array(
             'class' => array('responsive-image-mapping-breakpoint'),
           ),
