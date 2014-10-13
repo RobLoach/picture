@@ -1001,10 +1001,10 @@ function theme_picture($variables) {
     foreach (array('alt', 'title') as $key) {
       $field = sprintf('field_file_image_%s_text', $key);
       if (isset($variables[$key]) && !empty($variables[$key])) {
-        $attributes['data-' . $key] = $variables[$key];
+        $attributes['data-' . $key] = decode_entities($variables[$key]);
       }
       elseif (isset($variables[$field]) && is_array($variables[$field]) && isset($variables[$field]['und'][0]['safe_value'])) {
-        $attributes['data-' . $key] = $variables[$field]['und'][0]['safe_value'];
+        $attributes['data-' . $key] = decode_entities($variables[$field]['und'][0]['safe_value']);
       }
     }
 
