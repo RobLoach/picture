@@ -1335,9 +1335,22 @@ function picture_page_build(&$page) {
  *
  * @param
  *   Image src starting with http://, https://, or root relative /.
- *   It must point to a local file.
  */
 function picture_image_uri($src) {
+  foreach (module_implements('picture_image_uri') as $module) {
+    $function = $module . '_picture_image_uri';
+    if ($uri = $function($src)) {
+      $uri = file_stream_wrapper_uri_normalize($uri);
+      return urldecode($uri);
+    }
+  }
+  return FALSE;
+}
+
+/**
+ * Implements hook_picture_image_uri().
+ */
+function picture_picture_image_uri($src) {
   global $base_path;
 
   $uri = '';
@@ -1410,9 +1423,7 @@ function picture_image_uri($src) {
 
   // Construct the Drupal uri.
   $uri = $the_scheme . '://' . str_replace($matches[$the_scheme], '', $src);
-  $uri = file_stream_wrapper_uri_normalize($uri);
-
-  return urldecode($uri);
+  return $uri;
 }
 
 /**
