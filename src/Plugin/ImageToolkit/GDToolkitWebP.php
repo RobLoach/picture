@@ -142,7 +142,7 @@ class GDToolkitWebP extends GDToolkit {
         $this->preLoadInfo[2] = GDToolkitWebP::IMAGETYPE_WEBP;
         $this->preLoadInfo[3] = 'height="' . $this->preLoadInfo[1] . '" width="' . $this->preLoadInfo[1] . '"';
         $this->preLoadInfo['mime'] = 'image/webp';
-        // @todo: channels & bits.
+        // The 'channels' and 'bits' elements are not required, so omit them.
         fclose($handle);
         return TRUE;
       }
