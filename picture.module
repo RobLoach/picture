@@ -12,9 +12,9 @@ require_once __DIR__ . '/picture.field.inc';
  */
 function picture_entity_type_alter(array &$entity_types) {
   /* @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
-  $entity_types['responsive_image_mapping']->setFormClass('add', 'Drupal\picture\PictureMappingForm');
-  $entity_types['responsive_image_mapping']->setFormClass('edit', 'Drupal\picture\PictureMappingForm');
-  $entity_types['responsive_image_mapping']->setFormClass('duplicate', 'Drupal\picture\PictureMappingForm');
+  $entity_types['responsive_image_style']->setFormClass('add', 'Drupal\picture\PictureMappingForm');
+  $entity_types['responsive_image_style']->setFormClass('edit', 'Drupal\picture\PictureMappingForm');
+  $entity_types['responsive_image_style']->setFormClass('duplicate', 'Drupal\picture\PictureMappingForm');
 }
 
 
