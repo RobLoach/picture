@@ -65,7 +65,7 @@ class PictureMappingForm extends ResponsiveImageStyleForm {
         $form['keyed_styles'][$breakpoint_id][$multiplier]['sizes'] = array(
           '#type' => 'textfield',
           '#title' => $this->t('Sizes'),
-          '#default_value' => isset($mapping_definition['sizes']) ? $mapping_definition['sizes'] : '',
+          '#default_value' => isset($mapping_definition['image_mapping']['sizes']) ? $mapping_definition['image_mapping']['sizes'] : '',
           '#description' => $this->t('Enter the value for the sizes attribute (e.g. "(min-width:700px) 700px, 100vw").'),
           '#states' => array(
             'visible' => array(
@@ -101,11 +101,35 @@ class PictureMappingForm extends ResponsiveImageStyleForm {
       foreach ($styles as $breakpoint_id => $multiplier_styles) {
         foreach ($multiplier_styles as $multiplier => $style) {
           if ($style['image_mapping_type'] == 'sizes') {
-            $form_state->setValue(array('keyed_styles', $breakpoint_id, $multiplier, 'image_mapping'), array('sizes_image_styles' => array_filter($style['sizes_image_styles']), 'sizes' => $style['sizes']));
+            $form_state->setValue(
+              array(
+                'keyed_styles',
+                $breakpoint_id,
+                $multiplier,
+                'image_mapping',
+              ),
+              array(
+                'sizes_image_styles' => array_filter($style['sizes_image_styles']),
+                'sizes' => $style['sizes'],
+              )
+            );
           }
           elseif ($style['image_mapping_type'] != 'image_style') {
-            $form_state->unsetValue(array('keyed_styles', $breakpoint_id, $multiplier));
+            $form_state->unsetValue(
+              array('keyed_styles', $breakpoint_id, $multiplier)
+            );
           }
+          $form_state->unsetValue(
+            array(
+              'keyed_styles',
+              $breakpoint_id,
+              $multiplier,
+              'sizes_image_styles',
+            )
+          );
+          $form_state->unsetValue(
+            array('keyed_styles', $breakpoint_id, $multiplier, 'sizes')
+          );
         }
       }
 
