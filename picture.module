@@ -846,7 +846,7 @@ function theme_picture_formatter($variables) {
   }
   $output = theme('picture', $item);
 
-  if (isset($variables['path']['path'])) {
+  if (is_array($variables['path']) && isset($variables['path']['path'])) {
     $path = $variables['path']['path'];
     $options = isset($variables['path']['options']) ? $variables['path']['options'] : array();
     $options['html'] = TRUE;
